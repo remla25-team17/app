@@ -5,6 +5,9 @@ from requests.exceptions import RequestException, HTTPError
 
 MODEL_SERVICE_URL = os.getenv('SENTIMENT_MODEL_ENDPOINT')
 
+APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION')
+MODEL_SERVICE_VERSION = os.getenv('MODEL_SERVICE_VERSION')
+
 sentiment_api = Flask(__name__)
 
 @sentiment_api.route('/api/sentiment', methods=['POST'])
@@ -35,3 +38,12 @@ def analyze_sentiment(input_text: str):
     result = response.json()
 
     return jsonify({'sentiment': result}), 200
+
+@sentiment_api.route('/api/version', methods=['GET'])
+def get_version():
+    return jsonify(
+        {
+            'app_service_version': APP_SERVICE_VERSION,
+            'model_service_version': MODEL_SERVICE_VERSION
+         }
+    ), 200
