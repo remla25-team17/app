@@ -5,5 +5,6 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
+ENV APP_SERVICE_VERSION=$APP_SERVICE_VERSION
 ENV MODEL_SERVICE_URL=""
 CMD ["flask", "--app", "src/sentiment_api", "run"]
