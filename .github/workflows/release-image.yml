@@ -3,7 +3,7 @@ name: Create and release Docker image in the GitHub container registry
 on:
   push:
     tags:
-      - 'v*'
+      - '*'
 
 jobs:
   create-image:
