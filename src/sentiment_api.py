@@ -49,6 +49,19 @@ def analyze_sentiment():
 
     return jsonify({'sentiment': sentiment_prediction}), 200
 
+
+@sentiment_api.route('/api/v1/correct-prediction', methods=['POST'])
+def correct_prediction():
+    """
+        Correct the predicted sentiment. As of now, this is not stored anywhere.
+        """
+    data = request.get_json()
+    if not data or not all(field in data for field in ['text', 'original_prediction', 'corrected_prediction']):
+        return jsonify({'error': 'Missing required fields in JSON payload.'}), 400
+
+    return jsonify({'message': 'Your correction has been processed.'}), 200
+
+
 @sentiment_api.route('/api/v1/version', methods=['GET'])
 def get_version():
     """
