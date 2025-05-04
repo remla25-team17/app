@@ -1,0 +1,46 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Restaurant Sentinment Analysis</title>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div >
+            <header>
+                <h1>Enter your review and get the sentiment analysis.</h1>
+            </header>
+            <form>
+                <label for="userInput">Enter your review:</label>
+                <input type="text" id="userInput" name="userInput" placeholder="Type your review here..." >
+                <button type="submit" onclick="sendInput()">Analyze Review</button>
+            </form>
+            <div>
+                <h2>Sentiment Analysis Result:</h2>
+                <p id="response"></p>
+            </div>
+        </div>
+
+        <script>
+            function sendInput() {
+                const userInput = document.getElementById('userInput').value;
+
+                fetch("/api/v1/sentiment", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ review: userInput })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('response').innerText = data.message;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('response').innerText = "An error occurred while processing your request.";
+                });
+            }
+        </script>
+    </body>
+</html>
