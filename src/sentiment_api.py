@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import jsonify, Flask, request
+from flask import Blueprint, jsonify, request
 from requests.exceptions import RequestException, HTTPError
 
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
@@ -9,7 +9,7 @@ APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
 
-sentiment_api = Flask(__name__)
+sentiment_api = Blueprint(__name__)
 
 @sentiment_api.route('/api/v1/sentiment', methods=['POST'])
 def analyze_sentiment():
