@@ -1,6 +1,9 @@
 from flask import Flask, render_template
 
-app = Flask(__name__, template_folder="app-frontend")
+import sentiment_api
+
+app = Flask(__name__, template_folder="src")
+app.register_blueprint(sentiment_api)
 
 @app.route('/')
 def index():
