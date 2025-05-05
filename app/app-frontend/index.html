@@ -1,21 +1,27 @@
+<!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Restaurant Sentinment Analysis</title>
         <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding-bottom: 70px;
+        }
         .content {
             max-width: 500px;
-            height: 92%;
             margin: auto;
-            padding: 10px;
+            padding: 20px;
         }
         .title {
             text-align: center;
         }
         .box {
             width: 100%;
-            height: 80px;
             padding: 8px;
             margin-bottom: 16px;
             box-sizing: border-box;
@@ -58,7 +64,12 @@
         .footer {
         background-color: #8cb6df;
         color: #fff;
-        align-items: flex-end;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 20px;
+        z-index: 1000;
         }
         .footerContent {
             display: flex;
@@ -71,21 +82,27 @@
             gap: 20px;
         }
         .prediction {
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
         </style>
     </head>
     <body>
         <div class="content">
                 <h2 class="title">How was your experience?</h2>
-                <p>We appreciate your feedback, and we are committed to understanding your experience. To help us improve, we aim to classify your review as positive, negative, or neutral. Please share your thoughts below.</p>
+                <p>We appreciate your feedback, and we are committed to understanding your experience. To help us improve, we aim to classify your review as positive or negative. Please share your thoughts below.</p>
                 <div>
                 <textarea id="userInput" name="userInput" placeholder="Type your review here..." class="box"> </textarea>
                 </div>
                 <button type="submit" onclick="sendInput()" class="button">Analyze Review</button>
                 <div id="responseContainer">
                     <h3 class="prediction">Sentiment Analysis Prediction</h3>
-                    <p id="response" class="prediction"></p>
+                    <div class="prediction">
+                        <span id="responseEmoji"></span>
+                        <span id="response"></span>
+                    </div>
                     <div class="correctResponse">
                         <p>Is the prediction correct?</p>
                         <button type="submit" id="responseYes" onclick="sendCorrectPredition()" class="buttonYes">Yes</button>
@@ -93,12 +110,12 @@
                     </div>
                 </div>
         </div>
-        <footer class="footer">
+        <div class="footer">
             <div class="footerContent">
                 <span id="appversion"></span>
                 <span id="modelserviceversion"></span>
             </div>
-        </footer>
+        </div>
 
         <script>
             let isResponse = false;
@@ -116,7 +133,8 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('response').innerText = data.message;
+                    document.getElementById('responseEmoji').innerText = data.message ? "\u{1F642}" : "\u{1F641}";
+                    document.getElementById('response').innerText = data.message ? "Positive" : "Negative";
                     isResponse = true;
                     const responseContainer = document.getElementById("responseContainer");
                     responseContainer.style.display =  isResponse ? "block" : "none";
