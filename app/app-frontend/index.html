@@ -161,7 +161,7 @@
 
             function sendCorrectPredition() {
                 const response = event.target.id === "responseYes" ? "yes" : "no";
-                fetch("/api/v1/correct_prediction", {
+                fetch("/api/v1/correct-prediction", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
