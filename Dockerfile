@@ -15,6 +15,7 @@ COPY . .
 ARG APP_SERVICE_VERSION
 ENV APP_SERVICE_VERSION=${APP_SERVICE_VERSION}
 
+# The MODEL_SERVICE_URL environment variable is set in the docker-compose
 ENV MODEL_SERVICE_URL=""
 
 # Expose default Flask port
