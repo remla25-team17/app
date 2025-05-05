@@ -121,9 +121,6 @@
             let isResponse = false;
             function sendInput() {
                 const userInput = document.getElementById('userInput').value;
-                isResponse = true;
-                    const responseContainer = document.getElementById("responseContainer");
-                    responseContainer.style.display =  isResponse ? "block" : "none";
                 fetch("/api/v1/sentiment", {
                     method: "POST",
                     headers: {
@@ -142,6 +139,9 @@
                 .catch(error => {
                     console.error('Error:', error);
                     document.getElementById('response').innerText = "An error occurred while processing your request.";
+                    isResponse = true;
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
                 });
             }
 
