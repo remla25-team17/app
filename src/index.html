@@ -87,6 +87,13 @@
             align-items: center;
             padding: 20px;
         }
+        #messageContainer {
+            display: none;
+        }
+        .message {
+            text-align: center;
+            padding: 20px;
+        }
         </style>
     </head>
     <body>
@@ -109,6 +116,9 @@
                         <button type="submit" id="responseNo" onclick="sendCorrectPredition()" class="buttonNo">No</button>
                     </div>
                 </div>
+                <div id="messageContainer" class="message">
+                    <span id="message"></span>
+                </div>
         </div>
         <div class="footer">
             <div class="footerContent">
@@ -119,6 +129,8 @@
 
         <script>
             let isResponse = false;
+            let original_prediction = null;
+            let isMessage = false;
             function sendInput() {
                 const userInput = document.getElementById('userInput').value;
                 fetch("/api/v1/sentiment", {
@@ -126,12 +138,13 @@
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ review: userInput })
+                    body: JSON.stringify({ text: userInput })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('responseEmoji').innerText = data.message ? "\u{1F642}" : "\u{1F641}";
-                    document.getElementById('response').innerText = data.message ? "Positive" : "Negative";
+                    document.getElementById('responseEmoji').innerText = data.sentiment == 1 ? "\u{1F642}" : "\u{1F641}";
+                    document.getElementById('response').innerText = data.sentiment == 1 ? "Positive" : "Negative";
+                    original_prediction = data.sentiment;
                     isResponse = true;
                     const responseContainer = document.getElementById("responseContainer");
                     responseContainer.style.display =  isResponse ? "block" : "none";
@@ -160,20 +173,36 @@
             });
 
             function sendCorrectPredition() {
-                const response = event.target.id === "responseYes" ? "yes" : "no";
+                const user_response = event.target.id === "responseYes" ? true : false;
+                const corrected_prediction = user_response ? original_prediction : (original_prediction == 1 ? 0 : 1);
                 fetch("/api/v1/correct-prediction", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ correct_response: response })
+                    body: JSON.stringify({ text: userInput, original_prediction: original_prediction, corrected_prediction: corrected_prediction })
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data);
+                    message = data.message;
+                    console.log(message);
+                    isResponse = false;
+                    isMessage = true;
+                    document.getElementById('message').innerText = message == "Your correction has been processed." ? message : "Thank you for your input.";
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                    const messageContainer = document.getElementById("messageContainer");
+                    messageContainer.style.display = isMessage ? "block" : "none";
                 })
                 .catch(error => {
                     console.error('Error:', error);
+                    document.getElementById('message').innerText = "An error occurred while processing your request.";
+                    isResponse = false;
+                    isMessage = true;
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                    const messageContainer = document.getElementById("messageContainer");
+                    messageContainer.style.display = isMessage ? "block" : "none";
                 });
             }
             
