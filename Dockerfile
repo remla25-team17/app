@@ -22,4 +22,4 @@ ENV MODEL_SERVICE_URL=""
 EXPOSE 5000
 
 # Run the Flask app
-CMD ["flask", "--app", "src/sentiment_api", "run"]
+CMD ["flask", "--app", "src/app", "run"]
