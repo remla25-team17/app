@@ -5,6 +5,7 @@ from lib_version import VersionUtil
 from src.sentiment_api import sentiment_api
 
 app = Flask(__name__, template_folder="src")
+swagger = Swagger(app)
 app.register_blueprint(sentiment_api)
 
 @app.route('/')

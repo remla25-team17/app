@@ -13,7 +13,7 @@ if not MODEL_SERVICE_URL:
 sentiment_api = Blueprint("sentiment_api", __name__)
 
 @sentiment_api.route('/api/v1/sentiment', methods=['POST'])
-@swag_from('../specs/analyze_sentiment.yml')
+@swag_from('specs/analyze_sentiment.yml')
 def analyze_sentiment():
     """
     Analyze the sentiment of the provided input text by sending it to the model service.
@@ -53,7 +53,7 @@ def analyze_sentiment():
 
 
 @sentiment_api.route('/api/v1/correct-prediction', methods=['POST'])
-@swag_from('../specs/correct_prediction.yml')
+@swag_from('specs/correct_prediction.yml')
 def correct_prediction():
     """
         Correct the predicted sentiment. As of now, this is not stored anywhere.
@@ -66,7 +66,7 @@ def correct_prediction():
 
 
 @sentiment_api.route('/api/v1/version', methods=['GET'])
-@swag_from('../specs/get_version.yml')
+@swag_from('specs/get_version.yml')
 def get_version():
     """
     Retrieve the version of the app and model service.
