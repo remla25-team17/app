@@ -1,6 +1,6 @@
 import os
-from logging import log
 from flask import Flask, render_template
+from flasgger import Swagger
 from lib_version import VersionUtil  
 from src.sentiment_api import sentiment_api
 
