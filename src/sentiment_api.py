@@ -9,7 +9,7 @@ APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
 
-sentiment_api = Blueprint(__name__)
+sentiment_api = Blueprint("sentiment_api", __name__)
 
 @sentiment_api.route('/api/v1/sentiment', methods=['POST'])
 def analyze_sentiment():

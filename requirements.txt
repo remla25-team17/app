@@ -1,3 +1,4 @@
 requests~=2.32.3
 flask
+python-dotenv
 lib_version @ git+https://github.com/remla25-team17/lib-version.git
