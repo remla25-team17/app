@@ -22,11 +22,11 @@ A lightweight Flask application that offers a RESTful API and frontend interface
   - `POST /api/v1/sentiment`: Analyze sentiment of input text via model-service.
   - `POST /api/v1/correct-prediction`: Submit correction feedback for predicted sentiment.
   - `GET /api/v1/version`: View current versions of app and model service.
-- **User Interface**:
-  - Submit a text review and receive a sentiment prediction.
-  - Confirm or correct the prediction directly in the UI.
-- **Environment Configurable**: Set model-service URL and app version via `.env`.
-
+- **Swagger UI**: Built-in Swagger documentation for easy API exploration.
+- **Containerized**: Fully containerized with Docker for consistent deployment.
+- **CI/CD**:
+  - Automated builds and Docker image pushes to **GitHub Container Registry (GHCR)**.
+  - **Semantic versioning** with GitVersion.
 ---
 
 ## 🛠 Requirements
@@ -64,13 +64,13 @@ APP_SERVICE_VERSION=<app-version>
 4️⃣ **Start the application**:
 
 ```bash
-flask --app src/sentiment_api run
+flask run
 ```
 
 Or run directly:
 
 ```bash
-python src/app.py
+python app.py
 ```
 
 📍 The app will be available at:
@@ -207,3 +207,4 @@ docker run -p 8080:8080 --env-file .env app-service
 * [REST API Design](https://restfulapi.net/)
 * [Semantic Versioning](https://semver.org/)
 * [Docker Documentation](https://docs.docker.com/)
+* [Swagger UI](https://swagger.io/tools/swagger-ui/)
