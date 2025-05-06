@@ -33,7 +33,7 @@
             width: 100%;
             padding: 12px;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
             cursor: pointer;
         }
         .buttonYes {
@@ -44,7 +44,7 @@
             width: 50px;
             height: min-content;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
             cursor: pointer;
         }
         .buttonNo {
@@ -55,7 +55,7 @@
             width: 50px;
             height: min-content;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 16px;
             cursor: pointer;
         }
         #responseContainer {
@@ -94,6 +94,9 @@
             text-align: center;
             padding: 20px;
         }
+        .emoji {
+            font-size: 48px;
+        }
         </style>
     </head>
     <body>
@@ -107,7 +110,7 @@
                 <div id="responseContainer">
                     <h3 class="prediction">Sentiment Analysis Prediction</h3>
                     <div class="prediction">
-                        <span id="responseEmoji"></span>
+                        <span id="responseEmoji" class="emoji"></span>
                         <span id="response"></span>
                     </div>
                     <div class="correctResponse">
