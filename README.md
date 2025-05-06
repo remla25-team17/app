@@ -1,24 +1,90 @@
 # App Service
 
-## Features
+A lightweight Flask application that offers a RESTful API and frontend interface for **sentiment analysis**. It connects with a model-service to analyze user-submitted text and supports feedback collection for prediction corrections.
 
-* REST API for sentiment analysis, which query the model-service for predicting the sentiment of the input text
-* Sentiment correction feedback endpoint
-* Version endpoint for app and model service
-* User interface for submitting reviews
+---
 
-## Environment Variables
+## 📚 Table of Contents
 
-* `MODEL_SERVICE_URL`: URL of the model-service
-* `APP_SERVICE_VERSION`: app-service version
+- [🚀 Features](#-features)
+- [🛠 Requirements](#-requirements)
+- [🔧 Local Setup](#-local-setup)
+- [📡 API Endpoints](#-api-endpoints)
+- [🖥 Frontend](#-frontend)
+- [📦 Running with Docker](#-running-with-docker)
+- [📜 Resources](#-resources)
 
-## API Endpoints
+---
+
+## 🚀 Features
+
+- **API Endpoints**:
+  - `POST /api/v1/sentiment`: Analyze sentiment of input text via model-service.
+  - `POST /api/v1/correct-prediction`: Submit correction feedback for predicted sentiment.
+  - `GET /api/v1/version`: View current versions of app and model service.
+- **User Interface**:
+  - Submit a text review and receive a sentiment prediction.
+  - Confirm or correct the prediction directly in the UI.
+- **Environment Configurable**: Set model-service URL and app version via `.env`.
+
+---
+
+## 🛠 Requirements
+
+- Python 3.8+
+- pip
+- Access to a running model-service instance (or container)
+
+---
+
+## 🔧 Local Setup
+
+1️⃣ **Clone the repository**:
+
+```bash
+git clone git@github.com:remla25-team17/app.git
+cd app
+````
+
+2️⃣ **Install dependencies**:
+
+```bash
+pip install -r requirements.txt
+```
+
+3️⃣ **Configure environment variables**:
+
+Create a `.env` file in the root directory with the following:
+
+```env
+MODEL_SERVICE_URL=<model-service-url>
+APP_SERVICE_VERSION=<app-version>
+```
+
+4️⃣ **Start the application**:
+
+```bash
+flask --app src/sentiment_api run
+```
+
+Or run directly:
+
+```bash
+python src/app.py
+```
+
+📍 The app will be available at:
+👉 [http://127.0.0.1:5000](http://127.0.0.1:5000)
+
+---
+
+## 📡 API Endpoints
 
 ### `POST /api/v1/sentiment`
 
-Analyze sentiment of the input text.
+Analyze sentiment of the given input text.
 
-**Request Body**:
+**Request**:
 
 ```json
 {
@@ -34,11 +100,13 @@ Analyze sentiment of the input text.
 }
 ```
 
+---
+
 ### `POST /api/v1/correct-prediction`
 
-Accepts correction feedback from the user. (Currently not stored)
+Submit a corrected prediction. (Note: Currently not persisted)
 
-**Request Body**:
+**Request**:
 
 ```json
 {
@@ -56,9 +124,11 @@ Accepts correction feedback from the user. (Currently not stored)
 }
 ```
 
+---
+
 ### `GET /api/v1/version`
 
-Returns version information for both app and model service.
+Returns version details of the app and connected model-service.
 
 **Response**:
 
@@ -69,50 +139,71 @@ Returns version information for both app and model service.
 }
 ```
 
-## Frontend Overview
+---
 
-* Users can submit their review in a text area.
-* On submission, the review is sent to `/api/v1/sentiment`.
-* Sentiment result is displayed.
-* Users can confirm or correct the sentiment, and corrections are posted to `/api/v1/correct-prediction`.
+## 🖥 Frontend
+
+* Users can enter a text review into a form.
+* The input is sent to `/api/v1/sentiment` for analysis.
+* Results are displayed instantly.
+* Optionally, users can correct the sentiment and send feedback to `/api/v1/correct-prediction`.
+
+---
+
+## 📦 Running with Docker
+
+Docker enables you to package the application and run it in a consistent environment across platforms.
+
+1️⃣ **Build the Docker image**:
+
+```bash
+docker build -t app-service .
+```
+
+- `docker build`: This command tells Docker to create an image from the Dockerfile in the current directory.
+- `-t sentiment-service`: Tags the image with the name `sentiment-service` for easier reference.
+- `.`: Specifies the build context (current directory).
+
+2️⃣ **Run the container**:
+
+```bash
+docker run -p 8080:8080 --env-file .env app-service
+```
+
+- `docker run`: Starts a new container from the `app-service` image.
+- `-p 8081:8081`: Maps port 8080 on your local machine to port 8080 inside the container, making the API accessible at [http://localhost:8080](http://localhost:8080).
+- `--env-file=.env`: Loads environment variables from the `.env` file.
+- `app-service`: Specifies the image to run.
+
+---
+## [⚙️ GitHub Actions & CI/CD](#-github-actions--cicd)
+
+- **Build & Push**:
+
+  - Every push to `main` or `develop/**` triggers GitHub Actions.
+  - The Docker image is built and pushed to:  
+    `ghcr.io/remla25-team17/app:<version>`
+
+- **GitHub App Authentication**:
+
+  - For this project, we use a **GitHub App** to handle authentication in our CI/CD pipeline. This provides:
+    - **Better security**: Fine-grained control over permissions.
+    - **Reliable access**: Works across repositories or teams in the same organization.
+    - **Clear traceability**: Actions are marked as being done by the GitHub App.
+
+- **Versioning**:
+  - **GitVersion** is used for semantic versioning. It analyzes the Git history and branch structure to generate a **semantic version number** (SemVer) automatically.
+  - Commit messages can specify `#major`, `#minor`, or `#patch` to control version increments.
+  - Examples:
+    - Merges to `main` bump a stable version (e.g., `1.0.0`).
+    - Builds from feature branches or pre-release branches (e.g., `develop`) are marked as **pre-releases** (e.g., `1.1.0-canary.5`).
+
+---
 
 
-## Running the Application
+## 📜 Resources
 
-### Prerequisites
-
-* Python (version 3.12 or higher)
-* pip (usually included with Python)
-* Access to the model-service (ensure `MODEL_SERVICE_URL` is correctly configured)
-
-### Setup and Running
-
-**Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-**Configure Environment Variables**:
-   Create a `.env` file in the root directory and add the following:
-   ```bash
-   MODEL_SERVICE_URL=<model-service-url>
-   APP_SERVICE_VERSION=<app-service-version>
-   ```
-   Replace `<model-service-url>` with the actual URL of the model-service and `<app-service-version>` with the desired version (e.g., `1.0.0`).
-
-**Start the Application**:
-   ```bash
-   flask --app src/sentiment_api run
-   ```
-   The application will run on `http://127.0.0.1:5000/` by default (or the port specified in your configuration).
-
-   Alternatively, you can run the app directly with:
-   ```bash
-   python src/app.py
-   ```
-
-**Access the Application**:
-   - Open a browser and navigate to `http://localhost:5000` to use the frontend interface.
-   - Use tools like Postman or curl to interact with the API endpoints (e.g., `POST /api/v1/sentiment`).
-
-This README was partly written with the help of generative AI.
+* [Flask Documentation](https://flask.palletsprojects.com/)
+* [REST API Design](https://restfulapi.net/)
+* [Semantic Versioning](https://semver.org/)
+* [Docker Documentation](https://docs.docker.com/)
