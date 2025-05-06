@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Restaurant Sentinment Analysis</title>
+        <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding-bottom: 70px;
+        }
+        .content {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+        }
+        .title {
+            text-align: center;
+        }
+        .box {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+        .button {
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .buttonYes {
+            background-color: #2e8b57;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 50px;
+            height: min-content;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .buttonNo {
+            background-color: #b72032;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 50px;
+            height: min-content;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        #responseContainer {
+            display: none;
+        }
+        .footer {
+            background-color: #8cb6df;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .footerContent {
+            display: flex;
+            margin: 4px;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .correctResponse {
+            display: flex;
+            gap: 20px;
+        }
+        .prediction {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #messageContainer {
+            display: none;
+        }
+        .message {
+            text-align: center;
+            padding: 20px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="content">
+                <h2 class="title">How was your experience?</h2>
+                <p>We appreciate your feedback, and we are committed to understanding your experience. To help us improve, we aim to classify your review as positive or negative. Please share your thoughts below.</p>
+                <div>
+                <textarea id="userInput" name="userInput" placeholder="Type your review here..." class="box"> </textarea>
+                </div>
+                <button type="submit" onclick="sendInput()" class="button">Analyze Review</button>
+                <div id="responseContainer">
+                    <h3 class="prediction">Sentiment Analysis Prediction</h3>
+                    <div class="prediction">
+                        <span id="responseEmoji"></span>
+                        <span id="response"></span>
+                    </div>
+                    <div class="correctResponse">
+                        <p>Is the prediction correct?</p>
+                        <button type="submit" id="responseYes" onclick="sendCorrectPredition()" class="buttonYes">Yes</button>
+                        <button type="submit" id="responseNo" onclick="sendCorrectPredition()" class="buttonNo">No</button>
+                    </div>
+                </div>
+                <div id="messageContainer" class="message">
+                    <span id="message"></span>
+                </div>
+        </div>
+        <div class="footer">
+            <div class="footerContent">
+                <span id="appversion"></span>
+                <span id="modelserviceversion"></span>
+            </div>
+        </div>
+
+        <script>
+            let isResponse = false;
+            let original_prediction = null;
+            let isMessage = false;
+            function sendInput() {
+                const userInput = document.getElementById('userInput').value;
+                fetch("/api/v1/sentiment", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text: userInput })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('responseEmoji').innerText = data.sentiment == 1 ? "\u{1F642}" : "\u{1F641}";
+                    document.getElementById('response').innerText = data.sentiment == 1 ? "Positive" : "Negative";
+                    original_prediction = data.sentiment;
+                    isResponse = true;
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('response').innerText = "An error occurred while processing your request.";
+                    isResponse = true;
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", function() {
+                fetch("/api/v1/version")
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('appversion').innerText = "App version: " + data.app_service_version;
+                    document.getElementById('modelserviceversion').innerText = "Model Service version: " + data.model_service_version;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('appversion').innerText = "App version: unknown" ;
+                    document.getElementById('modelserviceversion').innerText = "Model Service version: unknown";
+                });
+            });
+
+            function sendCorrectPredition() {
+                const user_response = event.target.id === "responseYes" ? true : false;
+                const corrected_prediction = user_response ? original_prediction : (original_prediction == 1 ? 0 : 1);
+                fetch("/api/v1/correct-prediction", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text: userInput, original_prediction: original_prediction, corrected_prediction: corrected_prediction })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    message = data.message;
+                    console.log(message);
+                    isResponse = false;
+                    isMessage = true;
+                    document.getElementById('message').innerText = message == "Your correction has been processed." ? message : "Thank you for your input.";
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                    const messageContainer = document.getElementById("messageContainer");
+                    messageContainer.style.display = isMessage ? "block" : "none";
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').innerText = "An error occurred while processing your request.";
+                    isResponse = false;
+                    isMessage = true;
+                    const responseContainer = document.getElementById("responseContainer");
+                    responseContainer.style.display =  isResponse ? "block" : "none";
+                    const messageContainer = document.getElementById("messageContainer");
+                    messageContainer.style.display = isMessage ? "block" : "none";
+                });
+            }
+            
+        </script>
+    </body>
+</html>
