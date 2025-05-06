@@ -1,0 +1,35 @@
+tags:
+  - Feedback
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      required:
+        - text
+        - original_prediction
+        - corrected_prediction
+      properties:
+        text:
+          type: string
+          example: "Rainy days are depressing."
+        original_prediction:
+          type: string
+          example: "positive"
+        corrected_prediction:
+          type: string
+          example: "negative"
+responses:
+  200:
+    description: Correction processed
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Your correction has been processed."
+  400:
+    description: Missing required fields
