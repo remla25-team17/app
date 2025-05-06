@@ -40,7 +40,7 @@ def analyze_sentiment():
 
     try:
         response = requests.post(
-            url=MODEL_SERVICE_URL,
+            url=f"{MODEL_SERVICE_URL}/api/v1/sentiment",
             json={'text': input_text}
         )
         response.raise_for_status()
@@ -76,7 +76,7 @@ def get_version():
         Response: A JSON response with version information.
     """
     try:
-        response = requests.get(f'{MODEL_SERVICE_URL}/api/version')
+        response = requests.get(f'{MODEL_SERVICE_URL}/api/v1/version')
         response.raise_for_status()
         model_service_version = response.json().get('model_service_version', 'unknown')
     except HTTPError as e:
