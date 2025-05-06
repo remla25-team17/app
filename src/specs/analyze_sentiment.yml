@@ -1,0 +1,31 @@
+tags:
+  - Sentiment Analysis
+consumes:
+  - application/json
+parameters:
+  - in: body
+    name: body
+    required: true
+    schema:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          example: "I love this!"
+responses:
+  200:
+    description: Sentiment analysis result
+    schema:
+      type: object
+      properties:
+        sentiment:
+          type: string
+          example: "positive"
+  400:
+    description: Invalid request payload
+  500:
+    description: Model service error
+  503:
+    description: Model service unavailable

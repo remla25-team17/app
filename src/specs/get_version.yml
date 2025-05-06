@@ -1,0 +1,18 @@
+tags:
+  - Metadata
+responses:
+  200:
+    description: App and model service version info
+    schema:
+      type: object
+      properties:
+        app_service_version:
+          type: string
+          example: "1.0.0"
+        model_service_version:
+          type: string
+          example: "1.1.2"
+  500:
+    description: Model service error
+  503:
+    description: Model service unavailable
