@@ -61,11 +61,11 @@ MODEL_SERVICE_URL=<model-service-url>
 APP_SERVICE_VERSION=<app-version>
 ```
 
-| Variable            | Description                                   | Default |
-|---------------------|-----------------------------------------------|---------|
-| `MODEL_SERVICE_URL` | URL for the model service                     |  |
+| Variable            | Description                                   | Default   |
+|---------------------|-----------------------------------------------|-----------|
+| `MODEL_SERVICE_URL` | URL for the model service                     |           |
 | `APP_SERVICE_VERSION` | Service version (displayed in `/api/version`) | `unknown` |
-| `PORT`              | Port to run the Flask app                     | `5050`  |
+| `PORT`              | Port to run the Flask app                     | `5000`    |
 | `HOST`              | Host to bind the Flask app                    | `0.0.0.0` 
 
 4️⃣ **Start the application**:
@@ -81,10 +81,10 @@ python app.py
 ```
 
 The service will be available at:  
-👉 [http://localhost:5050](http://localhost:5050)
+👉 [http://localhost:5000](http://localhost:5000)
 
 Swagger UI is available at:  
-👉 [http://localhost:5050/apidocs](http://localhost:5050/apidocs)
+👉 [http://localhost:5000/apidocs](http://localhost:5000/apidocs)
 
 ---
 
@@ -177,11 +177,11 @@ docker build -t app-service .
 2️⃣ **Run the container**:
 
 ```bash
-docker run -p 5050:5050 --env-file .env app-service
+docker run -p 5000:5000 --env-file .env app-service
 ```
 
 - `docker run`: Starts a new container from the `app-service` image.
-- `-p 5050:5050`: Maps port 5050 on your local machine to port 5050 inside the container, making the API accessible at [http://localhost:5050](http://localhost:5050).
+- `-p 5000:5000`: Maps port 5000 on your local machine to port 5000 inside the container, making the API accessible at [http://localhost:5000](http://localhost:5000).
 - `--env-file=.env`: Loads environment variables from the `.env` file.
 - `app-service`: Specifies the image to run.
 
