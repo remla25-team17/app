@@ -98,16 +98,44 @@ def get_version():
 
 @sentiment_api.route('/api/v1/metrics', methods=['GET'])
 def metrics():
+    """
+    Collect and return system performance metrics.
+
+    This endpoint uses `psutil` to get the current CPU and RAM usage,
+    updates the corresponding Prometheus gauges, and returns the full
+    set of Prometheus metrics in the expected format.
+
+    Returns:
+        Response: A Prometheus-compatible metrics output with status code 200
+        or an error message.
+    """
+
     CPU_USAGE.set(psutil.cpu_percent())
     RAM_USAGE.set(psutil.virtual_memory()[2])
     return generate_latest(), 200
 
 @sentiment_api.before_request
 def after_request():
+    """
+    This function is called before each request to track request latency.
+    The start time is stored in `request.start_time`.
+    """
     request.start_time = time()
 
 @sentiment_api.after_request
 def after_request(response):
+    """
+    Update Prometheus metrics and return the response.
+
+    Increments the request counter and observes the request latency
+    using Prometheus metrics.
+
+    Args:
+        response (Response): The Flask response object to return.
+
+    Returns:
+        Response: The original response object after updating metrics.
+    """
     NUM_REQUEST.labels(endpoint=request.path, status_code=response.status_code).inc()
     REQUEST_LATENCY.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
 
