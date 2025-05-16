@@ -10,11 +10,8 @@ from time import time
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
 APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 
-if not MODEL_SERVICE_URL:
-    raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
-
-NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint")
-REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds")
+NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint", ["endpoint", "status_code"])
+REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds", ["endpoint", "status_code"])
 CPU_USAGE = Gauge("CPU_USAGE", "CPU usage percentage")
 RAM_USAGE = Gauge("RAM_USAGE", "RAM usage percentage")
 
@@ -105,11 +102,13 @@ def metrics():
     RAM_USAGE.set(psutil.virtual_memory()[2])
     return generate_latest(), 200
 
-@sentiment_api.before_request()
+@sentiment_api.before_request
 def after_request():
     request.start_time = time()
 
-@sentiment_api.after_request()
+@sentiment_api.after_request
 def after_request(response):
     NUM_REQUEST.labels(endpoint=request.path, status_code=response.status_code).inc()
     REQUEST_LATENCY.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
+
+    return response
