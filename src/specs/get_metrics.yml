@@ -1,0 +1,16 @@
+tags:
+  - Metrics
+description: |
+  This endpoint collects the current system metrics, and then returns all metrics in a
+  format compatible with Prometheus scraping.
+produces:
+  - text/plain
+responses:
+  200:
+    description: A plaintext response with Prometheus metrics and HTTP 200 status.
+    content:
+      text/plain:
+        schema:
+          type: string
+  500:
+    description: Internal server error if metrics could not be collected.

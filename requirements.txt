@@ -2,6 +2,6 @@ requests
 flasgger
 flask
 python-dotenv
+prometheus_client
+psutil
 lib_version @ https://github.com/remla25-team17/lib-version/releases/download/0.1.6/lib_version-0.0.0-py3-none-any.whl
-
-
