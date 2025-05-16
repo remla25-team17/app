@@ -1,14 +1,22 @@
 import os
 import requests
+import psutil
 from flask import Blueprint, jsonify, request
 from requests.exceptions import RequestException, HTTPError
 from flasgger import swag_from
+from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from time import time
 
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
 APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 
 if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
+
+NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint")
+REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds")
+CPU_USAGE = Gauge("CPU_USAGE", "CPU usage percentage")
+RAM_USAGE = Gauge("RAM_USAGE", "RAM usage percentage")
 
 sentiment_api = Blueprint("sentiment_api", __name__)
 
@@ -90,3 +98,18 @@ def get_version():
             'model_service_version': model_service_version
          }
     ), 200
+
+@sentiment_api.route('/api/v1/metrics', methods=['GET'])
+def metrics():
+    CPU_USAGE.set(psutil.cpu_percent())
+    RAM_USAGE.set(psutil.virtual_memory()[2])
+    return generate_latest(), 200
+
+@sentiment_api.before_request()
+def after_request():
+    request.start_time = time()
+
+@sentiment_api.after_request()
+def after_request(response):
+    NUM_REQUEST.labels(endpoint=request.path, status_code=response.status_code).inc()
+    REQUEST_LATENCY.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
