@@ -10,6 +10,9 @@ from time import time
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
 APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 
+if not MODEL_SERVICE_URL:
+    raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
+
 NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint", ["endpoint", "status_code"])
 REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds", ["endpoint", "status_code"])
 CPU_USAGE = Gauge("CPU_USAGE", "CPU usage percentage")
@@ -97,22 +100,31 @@ def get_version():
     ), 200
 
 @sentiment_api.route('/api/v1/metrics', methods=['GET'])
-def metrics():
+@swag_from('specs/get_metrics.yml')
+def get_metrics():
     """
-    Collect and return system performance metrics.
+    Collect and return Prometheus metrics.
 
-    This endpoint uses `psutil` to get the current CPU and RAM usage,
-    updates the corresponding Prometheus gauges, and returns the full
-    set of Prometheus metrics in the expected format.
+    This endpoint collects the current system metrics, and then returns all metrics in a
+    format compatible with Prometheus scraping.
 
     Returns:
-        Response: A Prometheus-compatible metrics output with status code 200
-        or an error message.
+        Response: A plaintext response with Prometheus metrics and HTTP 200 status.
     """
+    collect_system_metrics()
+    return generate_latest(), 200
 
+
+def collect_system_metrics():
+    """
+    Update Prometheus metrics for CPU and RAM usage.
+
+    Uses `psutil` to gather system usage statistics and sets them
+    in the Prometheus Gauge metrics: `CPU_USAGE` and `RAM_USAGE`.
+    """
     CPU_USAGE.set(psutil.cpu_percent())
     RAM_USAGE.set(psutil.virtual_memory()[2])
-    return generate_latest(), 200
+
 
 @sentiment_api.before_request
 def after_request():
