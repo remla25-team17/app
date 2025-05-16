@@ -2,4 +2,4 @@ requests
 flasgger
 flask
 python-dotenv
-lib_version @ git+https://github.com/remla25-team17/lib-version.git
+lib-version-team17
