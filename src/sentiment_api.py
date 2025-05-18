@@ -16,7 +16,7 @@ if not MODEL_SERVICE_URL:
 num_requests_total = Counter("num_requests_total", "Total number of requests made to the sentiment API", ["endpoint", "status_code"])
 request_latency_seconds = Histogram("request_latency_seconds", "Latency distribution of sentiment API requests, measured in seconds", ["endpoint", "status_code"])
 cpu_usage_percent = Gauge("cpu_usage_percent", "Current CPU usage percentage")
-ram_usage_percent = Gauge("ram_usage_percent", "RCurrent RAM usage percentage")
+ram_usage_percent = Gauge("ram_usage_percent", "Current RAM usage percentage")
 
 sentiment_api = Blueprint("sentiment_api", __name__)
 
@@ -100,16 +100,55 @@ def get_version():
     ), 200
 
 @sentiment_api.route('/api/v1/metrics', methods=['GET'])
-def metrics():
-    cpu_usage_percent.set(psutil.cpu_percent())
-    ram_usage_percent.set(psutil.virtual_memory()[2])
+@swag_from('specs/get_metrics.yml')
+def get_metrics():
+    """
+    Collect and return Prometheus metrics.
+
+    This endpoint collects the current system metrics, and then returns all metrics in a
+    format compatible with Prometheus scraping.
+
+    Returns:
+        Response: A plaintext response with Prometheus metrics and HTTP 200 status.
+    """
+    collect_system_metrics()
     return generate_latest(), 200
 
-@sentiment_api.before_request()
+
+def collect_system_metrics():
+    """
+    Update Prometheus metrics for CPU and RAM usage.
+
+    Uses `psutil` to gather system usage statistics and sets them
+    in the Prometheus Gauge metrics: `CPU_USAGE` and `RAM_USAGE`.
+    """
+    cpu_usage_percent.set(psutil.cpu_percent())
+    ram_usage_percent.set(psutil.virtual_memory()[2])
+
+
+@sentiment_api.before_request
 def after_request():
+    """
+    This function is called before each request to track request latency.
+    The start time is stored in `request.start_time`.
+    """
     request.start_time = time()
 
-@sentiment_api.after_request()
+@sentiment_api.after_request
 def after_request(response):
+    """
+    Update Prometheus metrics and return the response.
+
+    Increments the request counter and observes the request latency
+    using Prometheus metrics.
+
+    Args:
+        response (Response): The Flask response object to return.
+
+    Returns:
+        Response: The original response object after updating metrics.
+    """
     num_requests_total.labels(endpoint=request.path, status_code=response.status_code).inc()
     request_latency_seconds.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
+
+    return response
