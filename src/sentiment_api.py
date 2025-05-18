@@ -13,10 +13,10 @@ APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
 
-NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint", ["endpoint", "status_code"])
-REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds", ["endpoint", "status_code"])
-CPU_USAGE = Gauge("CPU_USAGE", "CPU usage percentage")
-RAM_USAGE = Gauge("RAM_USAGE", "RAM usage percentage")
+num_requests_total = Counter("num_requests_total", "Total number of requests made to the sentiment API")
+request_latency_seconds = Histogram("request_latency_seconds", "Latency distribution of sentiment API requests, measured in seconds")
+cpu_usage_percent = Gauge("cpu_usage_percent", "Current CPU usage percentage")
+ram_usage_percent = Gauge("ram_usage_percent", "RCurrent RAM usage percentage")
 
 sentiment_api = Blueprint("sentiment_api", __name__)
 
@@ -100,55 +100,16 @@ def get_version():
     ), 200
 
 @sentiment_api.route('/api/v1/metrics', methods=['GET'])
-@swag_from('specs/get_metrics.yml')
-def get_metrics():
-    """
-    Collect and return Prometheus metrics.
-
-    This endpoint collects the current system metrics, and then returns all metrics in a
-    format compatible with Prometheus scraping.
-
-    Returns:
-        Response: A plaintext response with Prometheus metrics and HTTP 200 status.
-    """
-    collect_system_metrics()
+def metrics():
+    cpu_usage_percent.set(psutil.cpu_percent())
+    ram_usage_percent.set(psutil.virtual_memory()[2])
     return generate_latest(), 200
 
-
-def collect_system_metrics():
-    """
-    Update Prometheus metrics for CPU and RAM usage.
-
-    Uses `psutil` to gather system usage statistics and sets them
-    in the Prometheus Gauge metrics: `CPU_USAGE` and `RAM_USAGE`.
-    """
-    CPU_USAGE.set(psutil.cpu_percent())
-    RAM_USAGE.set(psutil.virtual_memory()[2])
-
-
-@sentiment_api.before_request
+@sentiment_api.before_request()
 def after_request():
-    """
-    This function is called before each request to track request latency.
-    The start time is stored in `request.start_time`.
-    """
     request.start_time = time()
 
-@sentiment_api.after_request
+@sentiment_api.after_request()
 def after_request(response):
-    """
-    Update Prometheus metrics and return the response.
-
-    Increments the request counter and observes the request latency
-    using Prometheus metrics.
-
-    Args:
-        response (Response): The Flask response object to return.
-
-    Returns:
-        Response: The original response object after updating metrics.
-    """
-    NUM_REQUEST.labels(endpoint=request.path, status_code=response.status_code).inc()
-    REQUEST_LATENCY.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
-
-    return response
+    num_requests_total.labels(endpoint=request.path, status_code=response.status_code).inc()
+    request_latency_seconds.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
