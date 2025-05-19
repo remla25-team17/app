@@ -1,10 +1,10 @@
 import os
 import requests
 import psutil
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from requests.exceptions import RequestException, HTTPError
 from flasgger import swag_from
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from time import time
 
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
@@ -109,10 +109,11 @@ def get_metrics():
     format compatible with Prometheus scraping.
 
     Returns:
-        Response: A plaintext response with Prometheus metrics and HTTP 200 status.
+        Response: A plaintext response with Prometheus metrics.
     """
     collect_system_metrics()
-    return generate_latest(), 200
+    metrics = generate_latest()
+    return Response(metrics, mimetype=CONTENT_TYPE_LATEST)
 
 
 def collect_system_metrics():
