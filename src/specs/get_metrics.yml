@@ -7,7 +7,7 @@ produces:
   - text/plain
 responses:
   200:
-    description: A plaintext response with Prometheus metrics and HTTP 200 status.
+    description: A plaintext response with Prometheus metrics.
     content:
       text/plain:
         schema:
