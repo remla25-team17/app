@@ -1,10 +1,10 @@
 import os
 import requests
 import psutil
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
 from requests.exceptions import RequestException, HTTPError
 from flasgger import swag_from
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from prometheus_client import Counter, Gauge, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from time import time
 
 MODEL_SERVICE_URL = os.getenv('MODEL_SERVICE_URL')
@@ -13,10 +13,10 @@ APP_SERVICE_VERSION = os.getenv('APP_SERVICE_VERSION', 'unknown')
 if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
 
-NUM_REQUEST = Counter("NUM_REQUEST", "Number of requests to sentiment endpoint", ["endpoint", "status_code"])
-REQUEST_LATENCY = Histogram("REQUEST_LATENCY", "Request latency in seconds", ["endpoint", "status_code"])
-CPU_USAGE = Gauge("CPU_USAGE", "CPU usage percentage")
-RAM_USAGE = Gauge("RAM_USAGE", "RAM usage percentage")
+num_requests_total = Counter("num_requests_total", "Total number of requests made to the sentiment API", ["endpoint", "status_code"])
+request_latency_seconds = Histogram("request_latency_seconds", "Latency distribution of sentiment API requests, measured in seconds", ["endpoint", "status_code"])
+cpu_usage_percent = Gauge("cpu_usage_percent", "Current CPU usage percentage")
+ram_usage_percent = Gauge("ram_usage_percent", "Current RAM usage percentage")
 
 sentiment_api = Blueprint("sentiment_api", __name__)
 
@@ -109,10 +109,11 @@ def get_metrics():
     format compatible with Prometheus scraping.
 
     Returns:
-        Response: A plaintext response with Prometheus metrics and HTTP 200 status.
+        Response: A plaintext response with Prometheus metrics.
     """
     collect_system_metrics()
-    return generate_latest(), 200
+    metrics = generate_latest()
+    return Response(metrics, mimetype=CONTENT_TYPE_LATEST)
 
 
 def collect_system_metrics():
@@ -122,8 +123,8 @@ def collect_system_metrics():
     Uses `psutil` to gather system usage statistics and sets them
     in the Prometheus Gauge metrics: `CPU_USAGE` and `RAM_USAGE`.
     """
-    CPU_USAGE.set(psutil.cpu_percent())
-    RAM_USAGE.set(psutil.virtual_memory()[2])
+    cpu_usage_percent.set(psutil.cpu_percent())
+    ram_usage_percent.set(psutil.virtual_memory()[2])
 
 
 @sentiment_api.before_request
@@ -148,7 +149,7 @@ def after_request(response):
     Returns:
         Response: The original response object after updating metrics.
     """
-    NUM_REQUEST.labels(endpoint=request.path, status_code=response.status_code).inc()
-    REQUEST_LATENCY.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
+    num_requests_total.labels(endpoint=request.path, status_code=response.status_code).inc()
+    request_latency_seconds.labels(endpoint=request.path, status_code=response.status_code).observe(time() - request.start_time)
 
     return response

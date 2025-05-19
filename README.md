@@ -22,6 +22,7 @@ A lightweight Flask application that offers a RESTful API and frontend interface
   - `POST /api/v1/sentiment`: Analyze sentiment of input text via model-service.
   - `POST /api/v1/correct-prediction`: Submit correction feedback for predicted sentiment.
   - `GET /api/v1/version`: View current versions of app and model service.
+  - `GET /api/v1/metrics`: Used by Prometheus to scrap app metrics.
 - **Swagger UI**: Built-in Swagger documentation for easy API exploration.
 - **Containerized**: Fully containerized with Docker for consistent deployment.
 - **CI/CD**:
@@ -147,6 +148,26 @@ Returns version details of the app and connected model-service.
   "app_service_version": "1.0.0",
   "model_service_version": "2.1.0"
 }
+```
+
+---
+
+### `GET /api/v1/metrics`
+
+Used by Prometheus to scrap app metrics.
+
+**Response**:
+
+```
+# HELP python_gc_objects_collected_total Objects collected during gc
+# TYPE python_gc_objects_collected_total counter
+python_gc_objects_collected_total{generation="0"} 1341.0
+python_gc_objects_collected_total{generation="1"} 275.0
+python_gc_objects_collected_total{generation="2"} 0.0
+# HELP python_gc_objects_uncollectable_total Uncollectable objects found during GC
+# TYPE python_gc_objects_uncollectable_total counter
+python_gc_objects_uncollectable_total{generation="0"} 0.0
+...
 ```
 
 ---
