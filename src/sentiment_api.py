@@ -14,7 +14,7 @@ if not MODEL_SERVICE_URL:
     raise EnvironmentError("MODEL_SERVICE_URL environment variable is not set.")
 
 num_requests_total = Counter("num_requests_total", "Total number of requests made to the sentiment API", ["endpoint", "status_code"])
-input_text_length = Histogram("input_text_length", "Length of input text")
+input_text_length = Histogram("input_text_length", "Distribution of length of input text, measured in number  of characters")
 request_latency_seconds = Histogram("request_latency_seconds", "Latency distribution of sentiment API requests, measured in seconds", ["endpoint", "status_code"])
 cpu_usage_percent = Gauge("cpu_usage_percent", "Current CPU usage percentage")
 ram_usage_percent = Gauge("ram_usage_percent", "Current RAM usage percentage")
