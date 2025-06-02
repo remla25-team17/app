@@ -25,6 +25,7 @@
             padding: 8px;
             margin-bottom: 16px;
             box-sizing: border-box;
+            height: 120px;
         }
         .button {
             background-color: #2e8b57;
@@ -104,7 +105,8 @@
                 <h2 class="title">How was your experience?</h2>
                 <p>We appreciate your feedback, and we are committed to understanding your experience. To help us improve, we aim to classify your review as positive or negative. Please share your thoughts below.</p>
                 <div>
-                <textarea id="userInput" name="userInput" placeholder="Type your review here..." class="box"> </textarea>
+                    <textarea id="userInput" name="userInput" placeholder="Type your review here (provide more details for better analysis) ..." class="box"></textarea>
+                    <div id="characterCounter" style="text-align: right; font-size: 12px; color: #666; margin-bottom: 8px;">0</div>
                 </div>
                 <button type="submit" onclick="sendInput()" class="button">Analyze Review</button>
                 <div id="responseContainer">
@@ -162,6 +164,26 @@
             }
 
             document.addEventListener("DOMContentLoaded", function() {
+                const textarea = document.getElementById('userInput');
+                const charCount = document.getElementById('characterCounter');
+
+                updateCharCount();
+
+                textarea.addEventListener('input', updateCharCount);
+
+                function updateCharCount() {
+                    const count = textarea.value.length;
+                    charCount.textContent = count;
+
+                    if (count < 20) {
+                        charCount.style.color = 'red';
+                    } else if (count <= 40) {
+                        charCount.style.color = 'orange';
+                    } else {
+                        charCount.style.color = 'green';
+                    }
+                }
+
                 fetch("/api/v1/version")
                 .then(response => response.json())
                 .then(data => {
@@ -208,7 +230,7 @@
                     messageContainer.style.display = isMessage ? "block" : "none";
                 });
             }
-            
+
         </script>
     </body>
 </html>
