@@ -91,6 +91,8 @@ Swagger UI is available at:
 
 ## 📡 API Endpoints
 
+You can test the API using tools like Postman and sending request to `0.0.0.0:5000<endpoint>` or `localhost:5000<endpoint>`.
+
 ### `POST /api/v1/sentiment`
 
 Analyze sentiment of the given input text.

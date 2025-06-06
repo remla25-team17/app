@@ -12,7 +12,6 @@ app.register_blueprint(sentiment_api)
 def index():
     return render_template("index.html")
 
-
 if __name__ == "__main__":
     print(f"The lib-version used is {VersionUtil.get_version()}")
     port = int(os.getenv("PORT", 5000)) 
